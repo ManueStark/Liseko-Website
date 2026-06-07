@@ -1,3 +1,52 @@
+import { db } from "./firebase.js";
+
+import {
+  collection,
+  addDoc,
+  serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+async function saveOrder() {
+
+  const name =
+    document.getElementById("customerName").value;
+
+  const phone =
+    document.getElementById("customerPhone").value;
+
+  const address =
+    document.getElementById("customerAddress").value;
+
+  const total = cart.reduce(
+    (sum, item) =>
+      sum + item.price * item.quantity,
+    0
+  );
+
+  await addDoc(
+    collection(db, "orders"),
+    {
+      customer: {
+        name,
+        phone,
+        address
+      },
+
+      items: cart,
+
+      total,
+
+      status: "pending",
+
+      createdAt: serverTimestamp()
+    }
+  );
+
+  alert("Commande enregistrée");
+}
+
+
 const cartItems = document.getElementById("cartItems");
 const cartTotal = document.getElementById("cartTotal");
 const checkoutBtn = document.getElementById("checkoutBtn");
@@ -79,19 +128,22 @@ function removeItem(index) {
   renderCart();
 }
 
-checkoutBtn.addEventListener("click", () => {
-  let message = "Bonjour LISEKO,%0A%0AJe souhaite commander :%0A";
+checkoutBtn.addEventListener(
+  "click",
+  async () => {
 
-  cart.forEach((item) => {
-    message += `- ${item.name} x ${item.quantity}%0A`;
-  });
+    if (!cart.length) {
+      return;
+    }
 
-  message += `%0ATotal : ${cartTotal.textContent}`;
+    await saveOrder();
 
-  window.open(
-    `https://wa.me/2250504250606?text=${message}`,
-    "_blank"
-  );
-});
+    cart = [];
+
+    localStorage.removeItem("cart");
+
+    renderCart();
+  }
+);
 
 renderCart();

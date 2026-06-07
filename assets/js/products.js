@@ -3,19 +3,19 @@ const products = [
     id: 1,
     name: "Farine de Manioc",
     price: 2000,
-    image: "https://via.placeholder.com/300",
+    image: "assets/images/farinedemanioc.jpg",
   },
   {
     id: 2,
     name: "Farine de Placali",
     price: 2000,
-    image: "https://via.placeholder.com/300",
+    image: "assets/images/farinedeplacali.jpg",
   },
   {
     id: 3,
     name: "Poudre de Gingembre",
     price: 2000,
-    image: "https://via.placeholder.com/300",
+    image: "assets/images/poudredegingembre.jpg",
   },
 ];
 
