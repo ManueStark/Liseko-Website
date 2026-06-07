@@ -3,21 +3,42 @@ const products = [
     id: 1,
     name: "Farine de Manioc",
     price: 2000,
-    image: "assets/images/farinedemanioc.jpg",
+    category: "farine",
+    image: "assets/images/manioc.jpg",
+    description: "Farine traditionnelle de manioc."
+    
   },
+
   {
     id: 2,
     name: "Farine de Placali",
     price: 2000,
-    image: "assets/images/farinedeplacali.jpg",
+    category: "farine",
+    image: "assets/images/placali.jpg",
+    description: "Préparation traditionnelle."
   },
+
   {
     id: 3,
     name: "Poudre de Gingembre",
     price: 2000,
-    image: "assets/images/poudredegingembre.jpg",
+    category: "poudre",
+    image: "assets/images/gingembre.jpg",
+    description: "100% naturelle."
+    
   },
+
+  {
+  id: 4,
+  name: "Poudre de Petit Cola",
+  price: 2500,
+  category: "poudre",
+  image: "assets/images/petit-cola.jpg",
+  description: "Produit naturel."
+ 
+}
 ];
+
 
 const productsContainer = document.getElementById("productsContainer");
 
@@ -26,12 +47,12 @@ function displayProducts() {
     const card = document.createElement("div");
 
     card.className =
-      "bg-white rounded-xl shadow-md overflow-hidden";
+      "bg-white rounded-lg shadow-md overflow-hidden text-sm";
 
     card.innerHTML = `
       <img
         src="${product.image}"
-        class="w-full h-64 object-cover"
+        class="w-full h-32 object-cover"
       />
 
       <div class="p-5">
