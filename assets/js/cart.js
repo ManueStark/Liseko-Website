@@ -10,13 +10,22 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 async function saveOrder() {
 
   const name =
-    document.getElementById("customerName").value;
+    document.getElementById("customerName").value.trim();
 
   const phone =
-    document.getElementById("customerPhone").value;
+    document.getElementById("customerPhone").value.trim();
 
   const address =
-    document.getElementById("customerAddress").value;
+    document.getElementById("customerAddress").value.trim();
+
+  const note =
+    document.getElementById("customerNote").value.trim();
+
+  
+    if (!name || !phone || !address) {
+    alert("Veuillez remplir tous les champs.");
+    return false;
+  }
 
   const total = cart.reduce(
     (sum, item) =>
@@ -24,26 +33,24 @@ async function saveOrder() {
     0
   );
 
-  await addDoc(
-    collection(db, "orders"),
-    {
-      customer: {
-        name,
-        phone,
-        address
-      },
+ await addDoc(
+  collection(db, "orders"),
+  {
+    customer: {
+      name,
+      phone,
+      address
+    },
+    deliveryInstructions: note,
+    items: cart,
+    total,
+    status: "pending",
+    createdAt: serverTimestamp()
+  }
+);
 
-      items: cart,
+return true;
 
-      total,
-
-      status: "pending",
-
-      createdAt: serverTimestamp()
-    }
-  );
-
-  alert("Commande enregistrée");
 }
 
 
@@ -54,34 +61,22 @@ const checkoutBtn = document.getElementById("checkoutBtn");
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 function renderCart() {
-  cartItems.innerHTML = "";
+  cartItems.innerHTML = '';
 
-  let total = 0;
+cart.forEach((item, index) => {
+  cartItems.innerHTML += `
+    <div class="flex justify-between items-center py-3 border-b">
 
-  cart.forEach((item, index) => {
-    total += item.price * item.quantity;
-
-    const div = document.createElement("div");
-
-    div.className =
-      "bg-white p-5 rounded-xl shadow flex justify-between items-center";
-
-    div.innerHTML = `
       <div>
-        <h2 class="font-bold text-lg">
-          ${item.name}
-        </h2>
-
-        <p class="text-gray-500">
-          ${item.price} Fcfa x ${item.quantity}
-        </p>
+        <h4 class="font-semibold">${item.name}</h4>
+        <p>${item.price} Fcfa</p>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
 
         <button
           onclick="decreaseQuantity(${index})"
-          class="bg-gray-200 px-3 py-1 rounded">
+          class="bg-gray-200 px-2 rounded">
           -
         </button>
 
@@ -89,18 +84,31 @@ function renderCart() {
 
         <button
           onclick="increaseQuantity(${index})"
-          class="bg-gray-200 px-3 py-1 rounded">
+          class="bg-gray-200 px-2 rounded">
           +
         </button>
 
-        <button
-          onclick="removeItem(${index})"
-          class="bg-red-500 text-white px-3 py-1 rounded">
-          X
-        </button>
-
       </div>
-    `;
+
+    </div>
+  `;
+});
+
+function increaseQuantity(index) {
+  cart[index].quantity++;
+  updateCart();
+}
+
+function decreaseQuantity(index) {
+
+  if (cart[index].quantity > 1) {
+    cart[index].quantity--;
+  } else {
+    cart.splice(index, 1);
+  }
+
+  updateCart();
+}
 
     cartItems.appendChild(div);
   });
@@ -128,22 +136,67 @@ function removeItem(index) {
   renderCart();
 }
 
-checkoutBtn.addEventListener(
-  "click",
-  async () => {
+checkoutBtn.addEventListener("click", async () => {
+  try {
 
-    if (!cart.length) {
+    const saved = await saveOrder();
+
+    if (!saved) {
       return;
     }
 
-    await saveOrder();
+    const name =
+      document.getElementById("customerName").value;
 
-    cart = [];
+    const phone =
+      document.getElementById("customerPhone").value;
+
+    const address =
+      document.getElementById("customerAddress").value;
+
+    const note =
+      document.getElementById("customerNote").value;
+
+    const total = cart.reduce(
+      (sum, item) =>
+        sum + item.price * item.quantity,
+      0
+    );
+
+    let message = `
+Bonjour LISEKO
+
+Nom : ${name}
+Téléphone : ${phone}
+Adresse : ${address}
+
+Instructions : ${note || "Aucune"}
+
+Commande :
+`;
+
+    cart.forEach((item) => {
+      message += `- ${item.name} x ${item.quantity}\n`;
+    });
+
+    message += `\nTotal : ${total} FCFA`;
+
+    const whatsappMessage =
+      encodeURIComponent(message);
+
+    window.open(
+      `https://wa.me/2250504250606?text=${whatsappMessage}`,
+      "_blank"
+    );
 
     localStorage.removeItem("cart");
 
-    renderCart();
-  }
-);
+    cart = [];
 
-renderCart();
+    renderCart();
+
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de l'enregistrement.");
+  }
+});
